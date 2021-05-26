@@ -1,0 +1,119 @@
+{% extends 'Base.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="messaging">
+        <div class="inbox_msg">
+            <div class="inbox_people">
+                <div class="headind_srch">
+                    <div class="recent_heading">
+                        <h1 style="font-family:'Billabong', sans-serif;color: black;">InstaChat</h1>
+                    </div>
+                </div>
+                <div class="inbox_chat">
+					<div id="accordion">
+                        <div class="card">
+                            <div class="card-header chat_list">
+                                <a class="card-link" data-toggle="collapse" href="#collapseTwo">
+                                    <i class="fas fa-users"></i></i> Users
+                                </a>
+                            </div>
+                            <div id="collapseTwo" class="collapse show" data-parent="#accordion">
+								{{users_list | safe}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="FriendStatus">
+                <div class="FriendProfile"> <img src="https://ptetutorials.com/images/user-profile.png" alt="user"> </div>
+                <div class="FriendName">
+                    <h1>{{ name }}</h1>
+                </div>
+				<div class="ml-auto d-flex align-items-center pr-3">
+					<a href="{% url 'LogOut' %}"><i class="fas fa-sign-out-alt" style="font-size:30px;color:#fff;"></i></a>
+				</div>
+            </div>
+            <div class="mesgs">
+                <div class="msg_history">
+					{{messages_list | safe}}
+                </div>
+                <div class="type_msg">
+                    <div class="input_msg_write">
+                        <input type="text" id="chat-message-input" class="write_msg" placeholder="Type a message" />
+                        <button class="msg_send_btn" id="chat-message-submit" type="button">
+							<i class="fas fa-paper-plane" aria-hidden="true"></i>
+						</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ room_name|json_script:"room-name" }}
+    <script>
+		const roomName = JSON.parse(document.getElementById('room-name').textContent);
+		var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+		chatSocket = new WebSocket(ws_scheme +'://'+ window.location.host+ '/ws/chat/'+ roomName+ '/');
+		flag=false;
+
+		chatSocket.onopen = function(e) 
+		{
+			console.log("[open] Connection established");
+		};
+        chatSocket.onmessage = function(e) 
+		{
+			const data = JSON.parse(e.data);
+			online=data.online;
+			console.log(online);
+			if(flag==false && typeof(data.message) !== 'undefined' && typeof(data.time) !== 'undefined' )
+			{
+				if(online>1)
+					message=CryptoJS.AES.decrypt(data.message, key, {iv: iv}).toString(CryptoJS.enc.Utf8);
+				var html='<div class="incoming_msg"><div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="user"> </div><div class="received_msg"><div class="received_withd_msg"><p>'+message+'</p><span class="time_date">'+data.time+'</span></div></div></div>';
+				$(".msg_history").append(html);
+			}
+			flag=false;
+        };
+        chatSocket.onclose = function(e) 
+		{
+            console.error('Chat socket closed unexpectedly');
+        };
+		chatSocket.onerror = function(error) 
+		{
+			console.error(`[error] ${error.message}`);
+		};
+        $('#chat-message-input').focus();
+        $('#chat-message-input').keyup(function(e) 
+		{
+            if (e.keyCode === 13) 
+			{
+                $('#chat-message-submit').click();
+            }
+        });
+		var key  = CryptoJS.enc.Hex.parse("253D3FB468A0E24677C28A624BE0F939");
+		var iv   = CryptoJS.enc.Hex.parse("00000000000000000000000000000000");
+        $('#chat-message-submit').click(function(e) 
+		{
+			if($('#chat-message-input').val().length>0)
+			{
+				var d = new Date();
+				var months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+				var html='<div class="outgoing_msg"><div class="sent_msg"><p>'+$('#chat-message-input').val()+'</p><span class="time_date">'+d.getHours()+':'+d.getMinutes()+' | '+months[d.getMonth()+1]+' '+d.getDate()+'</span></div></div>';
+				$(".msg_history").append(html);
+				
+				var message=$('#chat-message-input').val();
+				if(online>1)
+					message=CryptoJS.AES.encrypt(message, key, {iv: iv}).toString();
+				var sender="{{user}}";
+				var receiver="{{name}}";
+				flag=true;
+				chatSocket.send(JSON.stringify(
+				{
+					'message': message, 'sender': sender, 'receiver':receiver, 'time':d.getHours()+':'+d.getMinutes()+' | '+months[d.getMonth()+1]+' '+d.getDate()
+				}));
+				$('#chat-message-input').val('');
+			}
+        });
+    </script>
+</div>
+{% endblock content %}

@@ -1,0 +1,38 @@
+{% extends 'Base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+      <!-- Tabs Titles -->
+  
+      <!-- Icon -->
+      <div class="fadeIn first">
+        <h1 style="font-family:'Billabong', sans-serif;margin-top:15px;">InstaChat</h1>
+      </div>
+      {% if messages %}
+        <div class="alert alert-info alert-dismissible fade show" align="center">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {% for message in messages %}
+            <div class="alert alert-{{ message.text }}">
+              <h5 style="font-size: 15px;">{{message}}</h5>
+            </div>
+          {% endfor%}
+            </div>
+      {% endif %}
+      <!-- Login Form -->
+      <form method="POST" action="{% url 'SignUp' %}">
+        {% csrf_token %}
+        <input type="email" id="email" class="fadeIn second" name="Email" placeholder="E-Mail">
+        <input type="text" id="username" class="fadeIn second" name="UserID" placeholder="Username">
+        <input type="password" id="id_password1" class="fadeIn third" name="Password" placeholder="Password">
+        <input type="password" id="id_password2" class="fadeIn third" name="RetypePassword" placeholder="Re-Type Password">
+        <a href="{% url 'Login' %}"><input type="submit" class="fadeIn fourth" value="Create Account"></a>
+      </form>
+
+      <div id="formFooter">
+        <a class="underlineHover" href="/">Back</a>
+      </div>
+    </div>
+</div>
+{% endblock content %}
