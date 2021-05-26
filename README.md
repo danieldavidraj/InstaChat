@@ -2,7 +2,7 @@
 
 ## Backend Task
 
-#### Live on Heroku: [InstaChat](http://insta-chat-app.herokuapp.com/) (Working Now)
+#### Live on Heroku: [InstaChat](http://insta-chat-app.herokuapp.com/)
 
 ### Setup:
 
