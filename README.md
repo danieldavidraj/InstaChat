@@ -6,6 +6,11 @@
 
 ### Setup:
 
+* Clone the repo
+```
+git clone https://github.com/danieldavidraj/InstaChat.git
+```
+
 * You will need Python and Django to run this application
 * Install all dependencies with this command
 ```
